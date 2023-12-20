@@ -519,10 +519,20 @@ PullRequestEvent = Annotated[
         PullRequestOpened,
         PullRequestReadyForReview,
         PullRequestReopened,
-        Union[
-            PullRequestReviewRequestRemovedOneof0, PullRequestReviewRequestRemovedOneof1
+        Annotated[
+            Union[
+                Annotated[PullRequestReviewRequestRemovedOneof0, Tag('PullRequestReviewRequestRemovedOneof0')],
+                Annotated[PullRequestReviewRequestRemovedOneof1, Tag('PullRequestReviewRequestRemovedOneof1')],
+            ],
+            Discriminator(get_descriminator_value),
         ],
-        Union[PullRequestReviewRequestedOneof0, PullRequestReviewRequestedOneof1],
+        Annotated[
+            Union[
+                Annotated[PullRequestReviewRequestedOneof0, Tag('PullRequestReviewRequestedOneof0')],
+                Annotated[PullRequestReviewRequestedOneof1, Tag('PullRequestReviewRequestedOneof1')],
+            ],
+            Discriminator(get_descriminator_value),
+        ],
         PullRequestSynchronize,
         PullRequestUnassigned,
         PullRequestUnlabeled,
