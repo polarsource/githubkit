@@ -10,7 +10,7 @@ See https://github.com/octokit/webhooks for more information.
 from typing import Any, Dict, Union
 from typing_extensions import Annotated
 
-from pydantic import Field
+from pydantic import Field, Discriminator, Tag
 
 from .models import (
     ForkEvent,
@@ -234,6 +234,24 @@ from .models import (
     PullRequestReviewRequestRemovedOneof1,
     MarketplacePurchasePendingChangeCancelled,
 )
+
+
+def get_descriminator_value(v: Any) -> str:
+    if isinstance(v, dict):
+        if v.get("action", None) == "review_request_removed":
+            if v.get("requested_reviewer", None):
+                return "PullRequestReviewRequestRemovedOneof0"
+            if v.get("requested_team", None):
+                return "PullRequestReviewRequestRemovedOneof1"
+        
+
+        if v.get("action", None) == "review_requested":
+            if v.get("requested_reviewer", None):
+                return "PullRequestReviewRequestedOneof0"
+            if v.get("requested_team", None):
+                return "PullRequestReviewRequestedOneof1"
+
+    return "unknown"
 
 BranchProtectionRuleEvent = Annotated[
     Union[
@@ -930,11 +948,19 @@ webhook_action_types = {
         "opened": PullRequestOpened,
         "ready_for_review": PullRequestReadyForReview,
         "reopened": PullRequestReopened,
-        "review_request_removed": Union[
-            PullRequestReviewRequestRemovedOneof0, PullRequestReviewRequestRemovedOneof1
+        "review_request_removed": Annotated[
+            Union[
+                Annotated[PullRequestReviewRequestRemovedOneof0, Tag('PullRequestReviewRequestRemovedOneof0')],
+                Annotated[PullRequestReviewRequestRemovedOneof1, Tag('PullRequestReviewRequestRemovedOneof1')],
+            ],
+            Discriminator(get_descriminator_value),
         ],
-        "review_requested": Union[
-            PullRequestReviewRequestedOneof0, PullRequestReviewRequestedOneof1
+        "review_requested": Annotated[
+            Union[
+                Annotated[PullRequestReviewRequestedOneof0, Tag('PullRequestReviewRequestedOneof0')],
+                Annotated[PullRequestReviewRequestedOneof1, Tag('PullRequestReviewRequestedOneof1')],
+            ],
+            Discriminator(get_descriminator_value),
         ],
         "synchronize": PullRequestSynchronize,
         "unassigned": PullRequestUnassigned,
